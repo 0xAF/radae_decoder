@@ -451,6 +451,27 @@ std::string rig_get_current_freq()  { return g_cached_freq; }
 std::string rig_get_current_mode()  { return g_cached_mode; }
 bool        rig_get_ptt_on()        { return g_ptt_on; }
 
+void rig_control_set_ptt(bool on)
+{
+    if (!g_rig || !g_connected) return;
+    rig_set_ptt(g_rig, RIG_VFO_CURR, on ? RIG_PTT_ON : RIG_PTT_OFF);
+    g_ptt_on = on;
+}
+
+void rig_control_cleanup()
+{
+    if (!g_rig || !g_connected) return;
+    /* Send PTT off, then wait long enough for the slowest CAT rate to flush
+       before rig_close() tears down the serial port. */
+    rig_set_ptt(g_rig, RIG_VFO_CURR, RIG_PTT_OFF);
+    g_ptt_on = false;
+    g_usleep(200000);   /* 200 ms — ample for any serial baud rate */
+    rig_close(g_rig);
+    rig_cleanup(g_rig);
+    g_rig = nullptr;
+    g_connected = false;
+}
+
 /* ────────────────────────────────────────────────────────────────────── */
 
 void rig_config_restore(const std::string& model_id_str,

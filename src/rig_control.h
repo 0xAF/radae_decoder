@@ -42,3 +42,10 @@ bool        rig_is_connected();
 std::string rig_get_current_freq();   /* e.g. "14.225.000 MHz", or "" */
 std::string rig_get_current_mode();   /* e.g. "USB", or ""            */
 bool        rig_get_ptt_on();
+
+/* Key or un-key the rig PTT.  No-op when no rig is connected. */
+void rig_control_set_ptt(bool on);
+
+/* Release PTT, wait for the serial port to flush, then close the rig.
+   Call once at application exit in place of rig_control_set_ptt(false). */
+void rig_control_cleanup();

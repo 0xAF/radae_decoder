@@ -232,6 +232,24 @@ static void on_tx_level_changed(GtkRange* range, gpointer /*data*/)
 
 /* ── decoder control ───────────────────────────────────────────────────── */
 
+static void update_rig_status_label()
+{
+    if (!g_rig_status_lbl) return;
+    char buf[160];
+    if (!rig_is_connected()) {
+        std::snprintf(buf, sizeof buf, "Rig: not connected");
+    } else {
+        const std::string freq = rig_get_current_freq();
+        const std::string mode = rig_get_current_mode();
+        const char* ptt = rig_get_ptt_on() ? "TX" : "RX";
+        std::snprintf(buf, sizeof buf, "Rig: %s  |  %s  |  %s",
+                      ptt,
+                      freq.empty() ? "--" : freq.c_str(),
+                      mode.empty() ? "--" : mode.c_str());
+    }
+    gtk_label_set_text(GTK_LABEL(g_rig_status_lbl), buf);
+}
+
 static void stop_all()
 {
     fprintf(stderr, "stop_all()\n");
@@ -248,27 +266,14 @@ static void stop_all()
     if (g_spectrum)  spectrum_widget_update(g_spectrum, nullptr, 0, 8000.f);
     if (g_waterfall) waterfall_widget_update(g_waterfall, nullptr, 0, 8000.f);
     set_btn_state(false);
+    rig_control_set_ptt(false);       /* release PTT if rig is connected */
+    update_rig_status_label();        /* refresh immediately; timer is now stopped */
 }
 
 /* timer tick – update meter + status at ~30 fps */
 static gboolean on_meter_tick(gpointer /*data*/)
 {
-    /* ── rig status line ────────────────────────────────────────────── */
-    if (g_rig_status_lbl) {
-        char rig_buf[160];
-        if (!rig_is_connected()) {
-            std::snprintf(rig_buf, sizeof rig_buf, "Rig: not connected");
-        } else {
-            const std::string freq = rig_get_current_freq();
-            const std::string mode = rig_get_current_mode();
-            const char* ptt = rig_get_ptt_on() ? "TX" : "RX";
-            std::snprintf(rig_buf, sizeof rig_buf, "Rig: %s  |  %s  |  %s",
-                          ptt,
-                          freq.empty() ? "--" : freq.c_str(),
-                          mode.empty() ? "--" : mode.c_str());
-        }
-        gtk_label_set_text(GTK_LABEL(g_rig_status_lbl), rig_buf);
-    }
+    update_rig_status_label();
 
     /* ── TX mode ─────────────────────────────────────────────────────── */
     if (g_encoder && g_encoder->is_running()) {
@@ -403,6 +408,7 @@ static void start_encoder(int mic_idx, int radio_idx)
         g_encoder->set_callsign(cs ? cs : "");
     }
     g_encoder->start();
+    rig_control_set_ptt(true);        /* key the rig if connected */
     if (g_recording && g_recorder)
         g_encoder->set_recorder(g_recorder);
     set_btn_state(true);
@@ -637,6 +643,7 @@ static void on_window_destroy(GtkWidget* /*w*/, gpointer /*data*/)
     if (g_encoder) g_encoder->set_recorder(nullptr);
     if (g_decoder) { g_decoder->stop(); g_decoder->close(); delete g_decoder; g_decoder = nullptr; }
     if (g_encoder) { g_encoder->stop(); g_encoder->close(); delete g_encoder; g_encoder = nullptr; }
+    rig_control_cleanup();        /* release PTT, flush serial port, close rig */
     /* finalise any open recording */
     if (g_recorder) { g_recorder->close(); delete g_recorder; g_recorder = nullptr; }
 }
