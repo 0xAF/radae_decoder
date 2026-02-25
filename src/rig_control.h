@@ -36,3 +36,9 @@ void rig_control_set_save_callback(void (*cb)());
    connect automatically.  On failure an error alert is shown parented to
    `parent`.  Call this once after rig_config_restore(). */
 void rig_auto_connect(GtkWindow* parent);
+
+/* ── real-time state queries (for the main-window status line) ────────── */
+bool        rig_is_connected();
+std::string rig_get_current_freq();   /* e.g. "14.225.000 MHz", or "" */
+std::string rig_get_current_mode();   /* e.g. "USB", or ""            */
+bool        rig_get_ptt_on();

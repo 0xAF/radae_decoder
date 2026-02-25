@@ -37,6 +37,7 @@ static GtkWidget*               g_meter_out          = nullptr;   // output leve
 static GtkWidget*               g_spectrum           = nullptr;   // spectrum widget
 static GtkWidget*               g_waterfall          = nullptr;   // waterfall widget
 static GtkWidget*               g_status             = nullptr;   // status label
+static GtkWidget*               g_rig_status_lbl     = nullptr;   // rig status line under waterfall
 static GtkWidget*               g_settings_dlg       = nullptr;   // settings dialog
 static GtkWidget*               g_rig_dlg            = nullptr;   // rig control dialog
 static GtkWidget*               g_callsign_entry     = nullptr;   // station callsign
@@ -252,6 +253,23 @@ static void stop_all()
 /* timer tick – update meter + status at ~30 fps */
 static gboolean on_meter_tick(gpointer /*data*/)
 {
+    /* ── rig status line ────────────────────────────────────────────── */
+    if (g_rig_status_lbl) {
+        char rig_buf[160];
+        if (!rig_is_connected()) {
+            std::snprintf(rig_buf, sizeof rig_buf, "Rig: not connected");
+        } else {
+            const std::string freq = rig_get_current_freq();
+            const std::string mode = rig_get_current_mode();
+            const char* ptt = rig_get_ptt_on() ? "TX" : "RX";
+            std::snprintf(rig_buf, sizeof rig_buf, "Rig: %s  |  %s  |  %s",
+                          ptt,
+                          freq.empty() ? "--" : freq.c_str(),
+                          mode.empty() ? "--" : mode.c_str());
+        }
+        gtk_label_set_text(GTK_LABEL(g_rig_status_lbl), rig_buf);
+    }
+
     /* ── TX mode ─────────────────────────────────────────────────────── */
     if (g_encoder && g_encoder->is_running()) {
         if (g_meter_in)
@@ -1061,6 +1079,11 @@ static void activate(GtkApplication* app, gpointer /*data*/)
     gtk_box_pack_start(GTK_BOX(meter_spec_hbox), g_tx_slider, FALSE, FALSE, 0);
 
     gtk_box_pack_start(GTK_BOX(vbox), meter_spec_hbox, TRUE, TRUE, 0);
+
+    /* ── rig status line ────────────────────────────────────────────── */
+    g_rig_status_lbl = gtk_label_new("Rig: not connected");
+    gtk_label_set_xalign(GTK_LABEL(g_rig_status_lbl), 0.5);
+    gtk_box_pack_start(GTK_BOX(vbox), g_rig_status_lbl, FALSE, FALSE, 0);
 
     /* ── status label ──────────────────────────────────────────────── */
     g_status = gtk_label_new("");

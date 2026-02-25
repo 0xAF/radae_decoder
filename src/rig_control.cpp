@@ -71,6 +71,10 @@ static GtkWidget* g_test_tx_btn    = nullptr;
 static RIG*  g_rig        = nullptr;
 static guint g_poll_timer = 0;
 static bool  g_connected  = false;
+static bool  g_ptt_on     = false;
+
+static std::string g_cached_freq;   /* last polled frequency string, e.g. "14.225.000 MHz" */
+static std::string g_cached_mode;   /* last polled mode string, e.g. "USB" */
 
 static void (*g_save_cb)() = nullptr;
 
@@ -96,6 +100,9 @@ static void apply_connected_state(bool connected)
     gtk_widget_set_sensitive(g_port_combo,  !connected);
     gtk_widget_set_sensitive(g_baud_combo,  !connected);
     if (!connected) {
+        g_cached_freq.clear();
+        g_cached_mode.clear();
+        g_ptt_on = false;
         gtk_entry_set_text(GTK_ENTRY(g_freq_entry), "");
         gtk_entry_set_text(GTK_ENTRY(g_mode_entry), "");
     }
@@ -112,18 +119,23 @@ static gboolean on_rig_poll(gpointer /*data*/)
     if (ret == RIG_OK) {
         char buf[64];
         std::snprintf(buf, sizeof buf, "%.6f MHz", freq / 1e6);
+        g_cached_freq = buf;
         gtk_entry_set_text(GTK_ENTRY(g_freq_entry), buf);
     } else {
+        g_cached_freq.clear();
         gtk_entry_set_text(GTK_ENTRY(g_freq_entry), rigerror(ret));
     }
 
     rmode_t   mode  = RIG_MODE_NONE;
     pbwidth_t width = 0;
     ret = rig_get_mode(g_rig, RIG_VFO_CURR, &mode, &width);
-    if (ret == RIG_OK)
-        gtk_entry_set_text(GTK_ENTRY(g_mode_entry), rig_strrmode(mode));
-    else
+    if (ret == RIG_OK) {
+        g_cached_mode = rig_strrmode(mode);
+        gtk_entry_set_text(GTK_ENTRY(g_mode_entry), g_cached_mode.c_str());
+    } else {
+        g_cached_mode.clear();
         gtk_entry_set_text(GTK_ENTRY(g_mode_entry), rigerror(ret));
+    }
 
     return TRUE;
 }
@@ -206,6 +218,7 @@ static gboolean on_ptt_off(gpointer /*data*/)
 {
     if (g_rig && g_connected)
         rig_set_ptt(g_rig, RIG_VFO_CURR, RIG_PTT_OFF);
+    g_ptt_on = false;
     gtk_widget_set_sensitive(g_test_tx_btn, TRUE);
     gtk_button_set_label(GTK_BUTTON(g_test_tx_btn), "Test TX (1 s)");
     set_status("Connected.  PTT test complete.");
@@ -223,6 +236,7 @@ static void on_test_tx(GtkButton* /*btn*/, gpointer /*data*/)
         set_status(buf);
         return;
     }
+    g_ptt_on = true;
     gtk_widget_set_sensitive(g_test_tx_btn, FALSE);
     gtk_button_set_label(GTK_BUTTON(g_test_tx_btn), "TX\xe2\x80\xa6");  /* TX… */
     set_status("PTT ON \xe2\x80\x94 will turn off in 1 s\xe2\x80\xa6");
@@ -429,6 +443,15 @@ std::string rig_config_get_baud()
     g_free(txt);
     return s;
 }
+
+/* ── state queries (for the main-window status line) ────────────────── */
+
+bool        rig_is_connected()      { return g_connected; }
+std::string rig_get_current_freq()  { return g_cached_freq; }
+std::string rig_get_current_mode()  { return g_cached_mode; }
+bool        rig_get_ptt_on()        { return g_ptt_on; }
+
+/* ────────────────────────────────────────────────────────────────────── */
 
 void rig_config_restore(const std::string& model_id_str,
                         const std::string& port,
