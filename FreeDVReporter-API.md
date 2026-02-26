@@ -6,16 +6,6 @@ Note: This documentation was written by Claude Code examining the FreeDV GUI sou
 
 FreeDV Reporter is an online spotting/activity network for FreeDV operators. The FreeDV GUI connects to a server (default: `qso.freedv.org`, port 80) via **Socket.IO over WebSocket** and exchanges JSON messages to report and receive real-time station activity.
 
-The implementation is split across three source files:
-
-| File | Purpose |
-|------|---------|
-| [src/reporting/IReporter.h](src/reporting/IReporter.h) | Abstract interface all reporters implement |
-| [src/reporting/FreeDVReporter.h](src/reporting/FreeDVReporter.h) / [.cpp](src/reporting/FreeDVReporter.cpp) | FreeDV Reporter Socket.IO client |
-| [src/reporting/pskreporter.h](src/reporting/pskreporter.h) / [.cpp](src/reporting/pskreporter.cpp) | Separate PSK Reporter UDP client |
-| [src/gui/dialogs/freedv_reporter.h](src/gui/dialogs/freedv_reporter.h) / [.cpp](src/gui/dialogs/freedv_reporter.cpp) | FreeDV Reporter window (wxWidgets UI) |
-| [src/util/SocketIoClient.h](src/util/SocketIoClient.h) / [.cpp](src/util/SocketIoClient.cpp) | Socket.IO/WebSocket transport layer |
-
 The `FreeDVReporter` class (protocol version **2**) handles all network communication. JSON parsing/serialization uses the embedded **yyjson** library.
 
 ---
