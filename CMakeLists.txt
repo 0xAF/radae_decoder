@@ -47,6 +47,8 @@ message(STATUS "Audio backend: ${AUDIO_BACKEND}")
 
 link_directories(${GTK_LIBRARY_DIRS})
 
+add_subdirectory(src/yyjson)
+
 # ── Opus (with FARGAN/LPCNet support) ────────────────────────────────────────
 include(cmake/BuildOpus.cmake)
 
