@@ -38,6 +38,7 @@ static GtkWidget*               g_spectrum           = nullptr;   // spectrum wi
 static GtkWidget*               g_waterfall          = nullptr;   // waterfall widget
 static GtkWidget*               g_status             = nullptr;   // status label
 static GtkWidget*               g_rig_status_lbl     = nullptr;   // rig status line under waterfall
+static GtkWidget*               g_window             = nullptr;   // main window
 static GtkWidget*               g_settings_dlg       = nullptr;   // settings dialog
 static GtkWidget*               g_rig_dlg            = nullptr;   // rig control dialog
 static GtkWidget*               g_callsign_entry     = nullptr;   // station callsign
@@ -711,9 +712,14 @@ static void on_open_file(GtkMenuItem* /*item*/, gpointer parent_window)
 }
 
 /* File > Quit */
-static void on_quit(GtkMenuItem* /*item*/, gpointer app)
+static void on_quit(GtkMenuItem* /*item*/, gpointer /*app*/)
 {
-    g_application_quit(G_APPLICATION(app));
+    /* Destroying the window fires the "destroy" signal → on_window_destroy()
+       which stops all threads cleanly before the app exits.  Using
+       g_application_quit() directly bypasses that signal and leaves threads
+       running, causing std::terminate() on their std::thread destructors. */
+    if (g_window)
+        gtk_widget_destroy(g_window);
 }
 
 /* Edit > Settings */
@@ -785,7 +791,8 @@ static void activate(GtkApplication* app, gpointer /*data*/)
     g_object_unref(css);
 
     /* ── window ────────────────────────────────────────────────────── */
-    GtkWidget* window = gtk_application_window_new(app);
+    g_window = gtk_application_window_new(app);
+    GtkWidget* window = g_window;
     gtk_window_set_title         (GTK_WINDOW(window), "RADAE GUI");
     gtk_window_set_default_size  (GTK_WINDOW(window), 500, 400);
     gtk_window_set_resizable     (GTK_WINDOW(window), TRUE);

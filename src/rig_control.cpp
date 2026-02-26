@@ -509,6 +509,13 @@ void rig_control_cleanup()
     if (g_poll_thread.joinable())
         g_poll_thread.join();
 
+    /* The poll thread may have queued a g_idle_add(update_rig_entries) that
+       hasn't run yet.  Null out the widget pointers now so that callback is
+       a safe no-op when the main loop eventually dispatches it (the widgets
+       will have been destroyed by the time we return to the main loop). */
+    g_freq_entry = nullptr;
+    g_mode_entry = nullptr;
+
     std::lock_guard<std::mutex> lk(g_rig_mutex);
     if (!g_rig || !g_connected) return;
     /* Send PTT off, then wait long enough for the slowest CAT rate to flush
