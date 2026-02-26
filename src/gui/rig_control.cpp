@@ -59,6 +59,7 @@ void rig_control_init()
     glob_add("/dev/rfcomm*");
     glob_add("/dev/ttyS[0-9]");
     glob_add("/dev/ttyS[1-9][0-9]");
+    glob_add("/dev/tty.*");
 }
 
 /* ── widget globals ──────────────────────────────────────────────────── */
