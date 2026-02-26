@@ -17,6 +17,9 @@ extern "C" {
 
 #include "EooCallsignCodec.h"
 
+#include <chrono>
+#include <thread>
+
 /* ── streaming linear-interpolation resampler (same as rade_decoder.cpp) */
 
 static int resample_linear_stream(const float* in, int n_in,
@@ -434,6 +437,12 @@ void RadaeEncoder::processing_loop()
         }
         /* drain: block until all EOO audio has been played out */
         stream_out_.drain();
+        /* Tail delay: pa_simple_drain() returns when PulseAudio's daemon has
+           consumed the data, but the soundcard DMA buffer and the radio's
+           audio processing chain (compressor, filters) introduce additional
+           latency.  Without this delay PTT drops before the EOO frame reaches
+           the RF output and remote stations cannot decode it. */
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
         fprintf(stderr, "Done sending eoo frame\n");
     }
 }
