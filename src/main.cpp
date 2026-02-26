@@ -5,7 +5,7 @@
 #include <fstream>
 #include <sys/stat.h>
 
-#include "audio_input.h"
+#include "../src/audio/audio_input.h"
 #include "meter_widget.h"
 #include "rade_decoder.h"
 #include "rade_encoder.h"

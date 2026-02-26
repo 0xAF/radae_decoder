@@ -23,19 +23,19 @@ endif()
 
 if(AUDIO_BACKEND STREQUAL "PORTAUDIO")
     pkg_check_modules(PORTAUDIO REQUIRED portaudio-2.0)
-    set(AUDIO_BACKEND_SRC    src/audio_stream_portaudio.cpp)
+    set(AUDIO_BACKEND_SRC    src/audio/audio_stream_portaudio.cpp)
     set(AUDIO_BACKEND_LIBS   ${PORTAUDIO_LIBRARIES})
     set(AUDIO_BACKEND_INCS   ${PORTAUDIO_INCLUDE_DIRS})
     link_directories(${PORTAUDIO_LIBRARY_DIRS})
 elseif(AUDIO_BACKEND STREQUAL "PULSE")
     pkg_check_modules(PULSE REQUIRED libpulse libpulse-simple)
-    set(AUDIO_BACKEND_SRC    src/audio_stream_pulse.cpp)
+    set(AUDIO_BACKEND_SRC    src/audio/audio_stream_pulse.cpp)
     set(AUDIO_BACKEND_LIBS   ${PULSE_LIBRARIES})
     set(AUDIO_BACKEND_INCS   ${PULSE_INCLUDE_DIRS})
     link_directories(${PULSE_LIBRARY_DIRS})
 elseif(AUDIO_BACKEND STREQUAL "ALSA")
     pkg_check_modules(ALSA REQUIRED alsa)
-    set(AUDIO_BACKEND_SRC    src/audio_stream_alsa.cpp)
+    set(AUDIO_BACKEND_SRC    src/audio/audio_stream_alsa.cpp)
     set(AUDIO_BACKEND_LIBS   ${ALSA_LIBRARIES})
     set(AUDIO_BACKEND_INCS   ${ALSA_INCLUDE_DIRS})
     link_directories(${ALSA_LIBRARY_DIRS})
@@ -54,23 +54,7 @@ include(cmake/BuildOpus.cmake)
 
 # ── RADE library (Python-free) ───────────────────────────────────────────────
 add_subdirectory(src/radae)
-# set(RADE_DSP_SOURCES
-#     src/rade_dsp.c
-#     src/rade_ofdm.c
-#     src/rade_bpf.c
-#     src/rade_acq.c
-#     src/rade_tx.c
-#     src/rade_rx.c
-# )
 
-# add_library(rade
-#     src/rade_api.c
-#     src/rade_enc.c
-#     src/rade_dec.c
-#     src/rade_enc_data.c
-#     src/rade_dec_data.c
-#     ${RADE_DSP_SOURCES}
-# )
 target_link_libraries(rade opus m)
 target_compile_definitions(rade PRIVATE -DIS_BUILDING_RADE_API=1 -DRADE_PYTHON_FREE=1)
 target_include_directories(rade PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -110,7 +94,7 @@ target_link_libraries(webrx_rade_decode rade opus m)
 
 add_executable(radae_headless
     src/tools/radae_headless.cpp
-    src/audio_input.cpp
+    src/audio/audio_input.cpp
     src/rade_decoder.cpp
     src/rade_encoder.cpp
     src/EooCallsignCodec.cpp
@@ -141,7 +125,7 @@ set_target_properties(lpcnet_demo radae_tx radae_rx real2iq rade_demod rade_modu
 # ── GUI application ──────────────────────────────────────────────────────────
 add_executable(RADAE_Gui
     src/main.cpp
-    src/audio_input.cpp
+    src/audio/audio_input.cpp
     src/meter_widget.cpp
     src/rade_decoder.cpp
     src/rade_encoder.cpp

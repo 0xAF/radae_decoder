@@ -5,7 +5,7 @@
 #include <atomic>
 #include <mutex>
 #include <thread>
-#include "audio_stream.h"
+#include "../src/audio/audio_stream.h"
 
 class WavRecorder;   /* forward declaration */
 

@@ -45,7 +45,7 @@
 
 #include "rade_decoder.h"
 #include "rade_encoder.h"
-#include "audio_input.h"
+#include "../src/audio/audio_input.h"
 
 /* ── Configuration structure ──────────────────────────────────────────── */
 
