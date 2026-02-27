@@ -176,9 +176,9 @@ void SocketIO::onRawMessage(const std::string& msg)
         {
             std::string connectPkt = "40";
             if (!authJson_.empty() && authJson_ != "{}") {
-                connectPkt += "{\"auth\":";
+                //connectPkt += "{\"auth\":";
                 connectPkt += authJson_;
-                connectPkt += '}';
+                //connectPkt += '}';
             }
             std::cerr << "got connect packet, sending reply: " << connectPkt << '\n';
             sendRaw(connectPkt);
