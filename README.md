@@ -13,13 +13,12 @@ A real-time RADAE (Radio Autoencoder) encoder and decoder for Linux. In receive 
 
 ![Settings](images/settings.png)
 
-![Transmit](images/bpf%20off.png)
+![Rig](images/rig_control.png)
 
 [Video demo](https://youtu.be/Q1SExfmMqZ0?si=LSMlgETFaZ1H1Fn5)
 
 Unlike the official FreeDV app, this program uses an experimental C port of the python code and does
-not require python to run. It's (currently) a statically linked single binary of just 11MB compared to
-600MB. (But, of course, it does far far less).
+not require python to run. It's (currently) a statically linked single binary of just 16MB compared to 600MB. (But, of course, it does far far less).
 
 ## Features
 
