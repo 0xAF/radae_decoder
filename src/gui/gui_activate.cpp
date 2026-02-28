@@ -312,12 +312,12 @@ void activate(GtkApplication* app, gpointer /*data*/)
 
     g_btn = gtk_button_new_with_label("Start");
     gtk_widget_get_style_context(g_btn);                        // ensure context exists
-    gtk_style_context_add_class(gtk_widget_get_style_context(g_btn), "start-btn");
+    //gtk_style_context_add_class(gtk_widget_get_style_context(g_btn), "start-btn");
     g_signal_connect(g_btn, "clicked", G_CALLBACK(on_start_stop), NULL);
     gtk_box_pack_start(GTK_BOX(btn_hbox), g_btn, TRUE, TRUE, 0);
 
     g_record_btn = gtk_button_new_with_label(" Record ");
-    gtk_style_context_add_class(gtk_widget_get_style_context(g_record_btn), "record-btn");
+    //gtk_style_context_add_class(gtk_widget_get_style_context(g_record_btn), "record-btn");
     gtk_widget_set_tooltip_text(g_record_btn, "Record radio audio to recording.wav");
     g_signal_connect(g_record_btn, "clicked", G_CALLBACK(on_record_clicked), NULL);
     gtk_box_pack_start(GTK_BOX(btn_hbox), g_record_btn, FALSE, FALSE, 0);

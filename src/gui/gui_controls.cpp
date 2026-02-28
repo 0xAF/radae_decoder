@@ -21,12 +21,12 @@ void set_btn_state(bool capturing)
 {
     GtkStyleContext* ctx = gtk_widget_get_style_context(g_btn);
     if (capturing) {
-        gtk_style_context_remove_class(ctx, "start-btn");
-        gtk_style_context_add_class   (ctx, "stop-btn");
+        //gtk_style_context_remove_class(ctx, "start-btn");
+        //gtk_style_context_add_class   (ctx, "stop-btn");
         gtk_button_set_label(GTK_BUTTON(g_btn), "Stop");
     } else {
-        gtk_style_context_remove_class(ctx, "stop-btn");
-        gtk_style_context_add_class   (ctx, "start-btn");
+        //gtk_style_context_remove_class(ctx, "stop-btn");
+        //gtk_style_context_add_class   (ctx, "start-btn");
         gtk_button_set_label(GTK_BUTTON(g_btn), "Start");
     }
 }

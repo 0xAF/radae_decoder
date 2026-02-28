@@ -253,9 +253,9 @@ void on_record_clicked(GtkButton* /*btn*/, gpointer /*data*/)
         g_recording = true;
 
         /* update button appearance */
-        GtkStyleContext* ctx = gtk_widget_get_style_context(g_record_btn);
-        gtk_style_context_remove_class(ctx, "record-btn");
-        gtk_style_context_add_class   (ctx, "record-stop-btn");
+        // GtkStyleContext* ctx = gtk_widget_get_style_context(g_record_btn);
+        // gtk_style_context_remove_class(ctx, "record-btn");
+        // gtk_style_context_add_class   (ctx, "record-stop-btn");
         gtk_button_set_label(GTK_BUTTON(g_record_btn), "Stop");
 
         /* attach to whichever pipeline is currently running */
@@ -278,9 +278,9 @@ void on_record_clicked(GtkButton* /*btn*/, gpointer /*data*/)
         g_recording = false;
 
         /* restore button appearance */
-        GtkStyleContext* ctx = gtk_widget_get_style_context(g_record_btn);
-        gtk_style_context_remove_class(ctx, "record-stop-btn");
-        gtk_style_context_add_class   (ctx, "record-btn");
+        // GtkStyleContext* ctx = gtk_widget_get_style_context(g_record_btn);
+        // gtk_style_context_remove_class(ctx, "record-stop-btn");
+        // gtk_style_context_add_class   (ctx, "record-btn");
         gtk_button_set_label(GTK_BUTTON(g_record_btn), " Record ");
     }
 }

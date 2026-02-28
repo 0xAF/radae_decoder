@@ -342,7 +342,7 @@ GtkWidget* rig_control_create_dialog(GtkWidget* parent_window)
     {
         char buf[160];
         std::snprintf(buf, sizeof buf,
-                      "Hamlib version: <b>%s</b>", hamlib_version2);
+                      "%s", hamlib_version2);
         GtkWidget* lbl = gtk_label_new(nullptr);
         gtk_label_set_markup(GTK_LABEL(lbl), buf);
         gtk_label_set_xalign(GTK_LABEL(lbl), 0.0);
