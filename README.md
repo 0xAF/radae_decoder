@@ -454,9 +454,77 @@ options:
 ```
 
 Test:
-```sox FDV_FromRadio_20260125-080557_local.wav \
+```
+sox FDV_FromRadio_20260125-080557_local.wav \
 -t raw -b 16 -r 8000 -e signed-integer - | \
 ./webrx_rade_decode |sox -t raw -r 8000 -b 16 -e signed-integer -c 1 - output.wav
+```
+
+## Source files
+
+```
+src/
+├── radae/                          Core RADAE C library
+│   ├── rade_api.h / .c             Public API: rade_open, rade_rx, rade_tx, rade_close
+│   ├── rade_ofdm.h / .c            OFDM mod/demod: DFT/IDFT, pilot insertion, cyclic prefix, equalization
+│   ├── rade_rx.h / .c              RADAE receiver: pilot acquisition, OFDM demod, neural decode, sync state machine
+│   ├── rade_tx.h / .c              RADAE transmitter: neural encode, OFDM modulation
+│   ├── rade_acq.h / .c             Pilot-based signal acquisition and frequency/timing synchronisation
+│   ├── rade_bpf.h / .c             700–2300 Hz bandpass FIR filter applied to TX output
+│   ├── rade_dsp.h / .c             DSP primitives: complex arithmetic, Hilbert transform, FFT helpers
+│   ├── rade_enc.h / .c             Neural encoder (GRU + convolution layers)
+│   ├── rade_enc_data.h / .c        Pre-trained encoder network weights (~24 MB, compiled into binary)
+│   ├── rade_dec.h / .c             Neural decoder (GRU + convolution layers)
+│   └── rade_dec_data.h / .c        Pre-trained decoder network weights (~23 MB, compiled into binary)
+│
+├── radae_top/                      C++ wrappers around the RADAE C library
+│   ├── rade_core.h                 Shared types and constants
+│   ├── rade_constants.h            Auto-generated neural network dimensions (latent size, frame count, etc.)
+│   ├── rade_decoder.h / .cpp       RadaeDecoder: RX pipeline thread (capture → Hilbert → RADE Rx → FARGAN → playback)
+│   ├── rade_encoder.h / .cpp       RadaeEncoder: TX pipeline thread (mic → LPCNet features → RADE Tx → radio out)
+│   └── audio_passthrough.h / .cpp  AudioPassthrough: raw audio loopback with RMS/FFT metering for passthrough mode
+│
+├── audio/                          Platform-neutral audio I/O abstraction
+│   ├── audio_stream.h              AudioStream base class (read / write / list devices interface)
+│   ├── audio_input.h / .cpp        AudioInput: background capture thread with per-channel level metering
+│   ├── audio_stream_alsa.cpp       ALSA backend (Linux)
+│   ├── audio_stream_pulse.cpp      PulseAudio backend (Linux default)
+│   └── audio_stream_portaudio.cpp  PortAudio backend (macOS default; also available on Linux)
+│
+├── gui/                            GTK3 graphical user interface
+│   ├── main.cpp                    Program entry point; creates GTK application, initialises globals
+│   ├── gui_activate.h / .cpp       GTK "activate" handler: builds window, widgets, and layout from code
+│   ├── gui_app_state.h             Declarations of all shared UI/state globals (decoder, encoder, widgets, etc.)
+│   ├── gui_callbacks.h / .cpp      GTK signal handlers: button clicks, device selection, mode toggles, window close
+│   ├── gui_controls.h / .cpp       Higher-level helpers: start/stop decoder/encoder, refresh status, update rig
+│   ├── gui_config.h / .cpp         Settings load/save to ~/.config/radae-decoder.conf
+│   ├── meter_widget.h / .cpp       Custom GtkDrawingArea bar-meter: logarithmic dB scale, peak-hold with decay
+│   ├── spectrum_widget.h / .cpp    Custom GtkDrawingArea spectrum display (0–4 kHz, frequency labels)
+│   ├── waterfall_widget.h / .cpp   Custom GtkDrawingArea waterfall: scrolling spectrogram history
+│   └── rig_control.h / .cpp        Hamlib wrapper: enumerates rig models and serial ports, sends frequency commands
+│
+├── network/                        FreeDV Reporter integration
+│   ├── socket_io.h / .cpp          Minimal Socket.IO v4 client over IXWebSocket (Engine.IO handshake, event routing)
+│   └── freedv_reporter.h / .cpp    FreeDVReporter: connects to FreeDV Reporter server, tracks remote stations, handles QSY requests
+│
+├── eoo/                            End-of-over callsign codec
+│   └── EooCallsignCodec.h / .cpp   Encodes/decodes operator callsign in the RADE EOO frame using LDPC + CRC
+│
+├── wav/                            WAV file recording
+│   └── wav_recorder.h / .cpp       WavRecorder: thread-safe PCM S16 WAV writer with correct header management
+│
+├── tools/                          Command-line utilities
+│   ├── rade_demod.cpp              File tool: WAV RADAE audio in → decoded speech WAV out
+│   ├── rade_modulate.cpp           File tool: speech WAV in → RADAE OFDM WAV out
+│   ├── radae_headless.cpp          Headless transceiver: full RX or TX pipeline with no GUI, config-file driven
+│   ├── radae_rx.c                  Streaming receiver: IQ float32 on stdin → LPCNet features on stdout
+│   ├── radae_tx.c                  Streaming transmitter: LPCNet features on stdin → IQ float32 on stdout
+│   ├── real2iq.c                   Converts real baseband float32 to complex IQ via Hilbert transform
+│   ├── webrx_rade_decode.c         OpenWebRX plugin: S16 8 kHz mono in → decoded S16 8 kHz mono out
+│   └── lpcnet_demo.c               LPCNet vocoder demo (feature extraction and FARGAN synthesis, Mozilla code)
+│
+└── yyjson/                         Embedded JSON library (MIT licence)
+    └── yyjson.h / .c               Fast JSON parser and serialiser used for FreeDV Reporter event handling
 ```
 
 ## Credits
