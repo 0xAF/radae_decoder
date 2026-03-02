@@ -4,6 +4,10 @@ project(RADAE_Gui LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_STANDARD 11)
+# this will generate build/compile_commands.json which can 
+# be used in vscode c_cpp_properties.json
+# "compileCommands": "${workspaceFolder}/build/compile_commands.json",
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # ── external deps ────────────────────────────────────────────────────────────
 find_package(PkgConfig  REQUIRED)
