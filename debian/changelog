@@ -1,4 +1,4 @@
-webrx-rade-decode (0.1.0-1) unstable; urgency=low
+webrx-rade-decode (0.1.0) unstable; urgency=low
 
   * Initial Debian packaging.
 
