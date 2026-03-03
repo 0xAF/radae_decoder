@@ -210,9 +210,14 @@ If `build/tools/webrx_rade_decode` already exists from a previous cmake build:
 
 ### Using dpkg-buildpackage
 
+```bash
+sudo apt install debhelper-compat
+```
+
 A `debian/` directory is provided for use with standard Debian tooling:
 
 ```bash
+# (run this from the top level directory)
 # Full package (default behavior): CLI and GUI
 dpkg-buildpackage -us -uc -b
 
@@ -595,6 +600,7 @@ src/
 - Built with GTK 3 ([gtk.org](https://www.gtk.org/))
 - Audio I/O via ALSA / PulseAudio / PortAudio (selectable at build time)
 - Thanks David Rowe for help and encouragement.
+- Thanks Stanislav Lechev [0xAF] for contributing the debian .deb package build
 
 ---
 
